@@ -1,18 +1,22 @@
 import React from "react";
-import PIXELEGANT from "../assets/Video/PIXELEGANT.mp4";
+import heroVideo from "../assets/video/PIXELEGANT.mp4";
 
 function Hero() {
   return (
-    <div className="w-full relative overflow-hidden">
+    // Calculate height as viewport minus navbar (64px)
+    <section
+      className="w-full"
+      style={{ height: "calc(100vh - 64px)" }} // <-- change 64px to your navbar height
+    >
       <video
-        src={PIXELEGANT}
+        className="w-full h-full object-cover block"
+        src={heroVideo}
         autoPlay
         loop
         muted
-        className="w-full h-auto max-h-screen object-contain"
-        style={{ display: "block" }}
+        playsInline
       />
-    </div>
+    </section>
   );
 }
 

@@ -49,7 +49,7 @@ function Registration() {
       const user = response.user;
 
       await axios.post(
-        `${serverURL}/api/auth/googleLogin`,
+        `${serverURL}/api/auth/googlelogin`,
         { name: user.displayName, email: user.email },
         { withCredentials: true }
       );

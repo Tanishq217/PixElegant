@@ -1,16 +1,17 @@
-import React, { createContext } from "react";
+// src/context/authContext.jsx
+import React, { createContext, useState } from "react";
 
-// Changed name to match your usage in other files
 export const authDataContext = createContext();
 
-export function AuthProvider({ children }) {
-  const serverURL = "http://localhost:8000";
-
-  const value = { serverURL };
+function AuthContext({ children }) {
+  // Make sure this matches the backend port (here 4000)
+  const [serverURL] = useState("http://localhost:4000");
 
   return (
-    <authDataContext.Provider value={value}>
+    <authDataContext.Provider value={{ serverURL }}>
       {children}
     </authDataContext.Provider>
   );
 }
+
+export default AuthContext;

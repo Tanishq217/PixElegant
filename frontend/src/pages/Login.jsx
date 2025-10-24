@@ -32,7 +32,7 @@ function Login() {
 
       // Send Google user info to backend
       const result = await axios.post(
-        `${serverURL}/api/auth/googleLogin`,
+        `${serverURL}/api/auth/googlelogin`,
         { name, email },
         { withCredentials: true }
       );

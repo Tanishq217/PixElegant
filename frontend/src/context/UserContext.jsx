@@ -18,7 +18,10 @@ function UserContext({ children }) {
       console.log("Fetched current user data", result.data);
     } catch (error) {
       setUserData(null);
-      console.log("Error in fetching current user data", error);
+      // Don't log error if it's just a 400 (no token) - this is normal when not logged in
+      if (error.response?.status !== 400) {
+        console.log("Error in fetching current user data", error);
+      }
     }
   };
 

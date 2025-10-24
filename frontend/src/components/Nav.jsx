@@ -28,8 +28,8 @@ const Nav = () => {
     <nav className="w-full bg-white text-black shadow-md px-6 py-3 flex items-center justify-between relative">
       {/* Left: Logo */}
       <div className="flex items-center">
-        <Link to="/">
-          <img src={assets.logo} className="h-12 w-auto" alt="logo" />
+        <Link to="/" className="flex items-center gap-2">
+          <img src={assets.logo} className="h-12 w-auto" alt="PixElegant Logo" />
         </Link>
       </div>
 

@@ -14,7 +14,12 @@ const adminAuth = async (req, res, next) => {
       return res.status(400).json({ message: "Not Authorized. Invalid token." });
     }
 
-    req.adminEmail = process.env.ADMIN_EMAIL;
+    // Check if the token contains admin email
+    if (verifyToken.email !== process.env.ADMIN_EMAIL) {
+      return res.status(400).json({ message: "Not Authorized. Admin access required." });
+    }
+
+    req.adminEmail = verifyToken.email;
     next();
   } catch (error) {
     console.log("adminAuth error:", error);

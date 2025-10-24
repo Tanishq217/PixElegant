@@ -7,8 +7,6 @@ export const genToken = async (userId) => {
    } catch (error) {
      console.log("token error")
    }
-
-    
 }
 export const genToken1 = async (email) => {
    try {
@@ -17,6 +15,4 @@ export const genToken1 = async (email) => {
    } catch (error) {
      console.log("token error")
    }
-
-    
 }

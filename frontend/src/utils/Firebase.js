@@ -3,7 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_APIKEY, // set this in .env at project root
+  apiKey: "AIzaSyCBTQ4Y-7B_LiwIVIOl7GzrBmVddO3jvHM",
   authDomain: "pixelegant-42c4f.firebaseapp.com",
   projectId: "pixelegant-42c4f",
   storageBucket: "pixelegant-42c4f.firebasestorage.app",
@@ -14,5 +14,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+
+// Configure Google provider
+provider.setCustomParameters({
+  prompt: 'select_account'
+});
 
 export { auth, provider };

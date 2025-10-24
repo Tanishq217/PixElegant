@@ -1,14 +1,16 @@
-import mongoose from "mongoose";
-const connectDb = async () => {
-    try {
-        // Using your MongoDB Atlas database
-        const mongoUri = process.env.MONGODB_URL;
-        await mongoose.connect(mongoUri)
-        console.log("DB connected successfully")
-    } catch (error) {
-        console.log("DB error:", error.message)
-        throw error;
-    }
-    
-}
-export default connectDb
+import mongoose from 'mongoose';
+
+const connectDb = async (uri) => {
+  try {
+    await mongoose.connect(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    console.log("MongoDB connected successfully");
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    throw error;
+  }
+};
+
+export default connectDb;

@@ -1,41 +1,61 @@
-import express from 'express'
-import dotenv from 'dotenv'
-import connectDb from './config/db.js'
-import cookieParser from 'cookie-parser'
-import authRoutes from './routes/authRoutes.js'
-dotenv.config()
-import cors from "cors"
-import userRoutes from './routes/userRoutes.js'
-import productRoutes from './routes/productRoutes.js'
-import cartRoutes from './routes/cartRoutes.js'
-import orderRoutes from './routes/orderRoutes.js'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import express from 'express';
+import dotenv from 'dotenv';
+import connectDb from './config/db.js';
+import cookieParser from 'cookie-parser';
+import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import productRoutes from './routes/productRoutes.js';
+import cartRoutes from './routes/cartRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import cors from 'cors';
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+dotenv.config();
 
-let port = process.env.PORT || 4000
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-let app = express()
+const app = express();
 
-app.use(express.json())
-app.use(cookieParser())
+// Middleware
+app.use(express.json());
+app.use(cookieParser());
+
+// CORS — replace with your Netlify URLs after deploy
 app.use(cors({
- origin: ["http://localhost:5173", "http://localhost:5175"] ,  
- credentials:true
-}))
+  origin: [
+    "http://localhost:5173",      // frontend dev
+    "http://localhost:5175",      // admin dev
+    "https://your-frontend.netlify.app", // Netlify frontend
+    "https://your-admin.netlify.app"     // Netlify admin
+  ],
+  credentials: true
+}));
 
-// Serve static files from public directory
-app.use('/uploads', express.static(path.join(__dirname, 'public')))
+// Serve static files (uploads)
+app.use('/uploads', express.static(path.join(__dirname, 'public')));
 
-app.use("/api/auth",authRoutes)
-app.use("/api/user",userRoutes)
-app.use("/api/product",productRoutes)
-app.use("/api/cart",cartRoutes)
-app.use("/api/order",orderRoutes)
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/product", productRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/order", orderRoutes);
 
-app.listen(port,()=>{
-    console.log("Hello From Server")
-    connectDb()
-})
+// Connect to DB and start server
+const PORT = process.env.PORT || 4000;
+const MONGO_URI = process.env.MONGODB_URI;
+
+if (!MONGO_URI) {
+  console.error("Error: MONGODB_URI is not set in environment variables");
+  process.exit(1); // stop server if no DB connection
+}
+
+connectDb(MONGO_URI).then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}).catch(err => {
+  console.error("DB connection failed:", err);
+});

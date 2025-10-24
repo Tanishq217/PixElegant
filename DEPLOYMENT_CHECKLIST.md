@@ -50,7 +50,7 @@
   VITE_FIREBASE_APIKEY=AIzaSyCBTQ4Y-7B_LiwIVIOl7GzrBmVddO3jvHM
   ```
 - [ ] Deploy and wait for completion
-- [ ] Note the backend URL (e.g., `https://pixelegant-backend.onrender.com`)
+- [ ] Note the backend URL (e.g., `https://pixelegant-clothing-app.onrender.com`)
 
 ### 2. Frontend Deployment (Netlify)
 - [ ] Create Netlify account
@@ -61,7 +61,7 @@
   - Publish Directory: `frontend/dist`
 - [ ] Set environment variable:
   ```
-  VITE_SERVER_URL=https://your-backend-url.onrender.com
+  VITE_SERVER_URL=https://pixelegant-clothing-app.onrender.com
   ```
 - [ ] Deploy and wait for completion
 - [ ] Note the frontend URL (e.g., `https://pixelegant-frontend.netlify.app`)
@@ -75,7 +75,7 @@
   - Publish Directory: `admin/dist`
 - [ ] Set environment variable:
   ```
-  VITE_SERVER_URL=https://your-backend-url.onrender.com
+  VITE_SERVER_URL=https://pixelegant-clothing-app.onrender.com
   ```
 - [ ] Deploy and wait for completion
 - [ ] Note the admin URL (e.g., `https://pixelegant-admin.netlify.app`)
@@ -139,7 +139,7 @@
 
 After successful deployment:
 
-- **Backend API**: `https://pixelegant-backend.onrender.com`
+- **Backend API**: `https://pixelegant-clothing-app.onrender.com`
 - **Frontend**: `https://pixelegant-frontend.netlify.app`
 - **Admin Panel**: `https://pixelegant-admin.netlify.app`
 

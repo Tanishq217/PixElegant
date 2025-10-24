@@ -436,7 +436,7 @@ Authorization: Bearer <token>
 - **Database**: MongoDB Atlas (Already configured)
 
 ### Deployment URLs (After Setup):
-- **Backend API**: `https://pixelegant-backend.onrender.com`
+- **Backend API**: `https://pixelegant-clothing-app.onrender.com`
 - **Frontend**: `https://pixelegant-frontend.netlify.app`
 - **Admin Panel**: `https://pixelegant-admin.netlify.app`
 
@@ -458,7 +458,7 @@ VITE_FIREBASE_APIKEY=AIzaSyCBTQ4Y-7B_LiwIVIOl7GzrBmVddO3jvHM
 
 #### Frontend & Admin (Netlify):
 ```env
-VITE_SERVER_URL=https://your-backend-url.onrender.com
+VITE_SERVER_URL=https://pixelegant-clothing-app.onrender.com
 ```
 
 ### Detailed Deployment Instructions

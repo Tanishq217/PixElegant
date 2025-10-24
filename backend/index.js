@@ -22,7 +22,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-// CORS — replace with your Netlify URLs after deploy
+// CORS — configured for production deployment
 app.use(cors({
   origin: [
     "http://localhost:5173",      // frontend dev

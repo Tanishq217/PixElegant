@@ -4,9 +4,9 @@ import React, { createContext, useState } from "react";
 export const authDataContext = createContext();
 
 function AuthContext({ children }) {
-  // Use environment variable for production, fallback to localhost for development
+  // Use production URL for deployed backend
   const [serverURL] = useState(
-    import.meta.env.VITE_SERVER_URL || "http://localhost:4000"
+    import.meta.env.VITE_SERVER_URL || "https://pixelegant-clothing-app.onrender.com"
   );
 
   return (

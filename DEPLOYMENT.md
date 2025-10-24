@@ -57,7 +57,7 @@ VITE_FIREBASE_APIKEY=AIzaSyCBTQ4Y-7B_LiwIVIOl7GzrBmVddO3jvHM
 
 1. Click "Create Web Service"
 2. Wait for deployment to complete
-3. Note the service URL (e.g., `https://pixelegant-backend.onrender.com`)
+3. Note the service URL (e.g., `https://pixelegant-clothing-app.onrender.com`)
 
 ## 🌐 Frontend Deployment (Netlify)
 
@@ -86,7 +86,7 @@ VITE_FIREBASE_APIKEY=AIzaSyCBTQ4Y-7B_LiwIVIOl7GzrBmVddO3jvHM
 
 2. **Environment Variables** (in Netlify):
    ```
-   VITE_SERVER_URL=https://your-backend-url.onrender.com
+   VITE_SERVER_URL=https://pixelegant-clothing-app.onrender.com
    ```
 
 3. **Deploy**:
@@ -109,7 +109,7 @@ VITE_FIREBASE_APIKEY=AIzaSyCBTQ4Y-7B_LiwIVIOl7GzrBmVddO3jvHM
 
 2. **Environment Variables** (in Netlify):
    ```
-   VITE_SERVER_URL=https://your-backend-url.onrender.com
+   VITE_SERVER_URL=https://pixelegant-clothing-app.onrender.com
    ```
 
 3. **Deploy**:
@@ -178,7 +178,7 @@ After deploying all services, update the backend CORS settings:
 
 After successful deployment, you'll have:
 
-- **Backend API**: `https://pixelegant-backend.onrender.com`
+- **Backend API**: `https://pixelegant-clothing-app.onrender.com`
 - **Frontend**: `https://pixelegant-frontend.netlify.app`
 - **Admin Panel**: `https://pixelegant-admin.netlify.app`
 

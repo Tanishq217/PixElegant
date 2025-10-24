@@ -4,7 +4,10 @@ import { authDataContext } from "../context/AuthContext.jsx";
 import axios from "axios";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../utils/Firebase.js";
-import { userDataContext } from "../context/AserContext.jsx";
+import { userDataContext } from "../context/AuthContext.jsx";
+// Correct if file is UserContext.jsx
+import { UserContext } from "../context/UserContext.jsx";
+
 
 function Registration() {
   const { serverURL } = useContext(authDataContext);

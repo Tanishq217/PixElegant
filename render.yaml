@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: pixelegant-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: MONGODB_URL
+        value: mongodb+srv://tanishq2127tanishq_db_user:PixElegant123@cluster0.nl9xgnl.mongodb.net/PixElegant
+      - key: ADMIN_EMAIL
+        value: pixelegant@gmail.com
+      - key: ADMIN_PASSWORD
+        value: PixElegant21272127
+      - key: JWT_SECRET
+        value: WFYVVDFBGVHBUUGDUD
+      - key: CLOUDINARY_NAME
+        value: dtfjdad4fd
+      - key: CLOUDINARY_API_KEY
+        value: 935529896649521
+      - key: CLOUDINARY_API_SECRET
+        value: _BE5Bj15IP3FRePlzfMnlnOpqbA
+      - key: VITE_FIREBASE_APIKEY
+        value: AIzaSyCBTQ4Y-7B_LiwIVIOl7GzrBmVddO3jvHM

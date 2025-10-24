@@ -426,60 +426,48 @@ Authorization: Bearer <token>
 
 ## 🌐 Deployment
 
-### Backend Deployment (Railway/Heroku)
+### Quick Deployment Guide
 
-1. **Prepare for Production**:
-   ```bash
-   cd backend
-   npm install --production
-   ```
+**PixElegant** is ready for production deployment with the following setup:
 
-2. **Environment Variables**:
-   Set all environment variables in your deployment platform
+- **Backend**: Deploy to [Render](https://render.com) (Free tier available)
+- **Frontend**: Deploy to [Netlify](https://netlify.com) (Free tier available)  
+- **Admin Panel**: Deploy to [Netlify](https://netlify.com) (Free tier available)
+- **Database**: MongoDB Atlas (Already configured)
 
-3. **Deploy**:
-   ```bash
-   git add .
-   git commit -m "Deploy backend"
-   git push origin main
-   ```
+### Deployment URLs (After Setup):
+- **Backend API**: `https://pixelegant-backend.onrender.com`
+- **Frontend**: `https://pixelegant-frontend.netlify.app`
+- **Admin Panel**: `https://pixelegant-admin.netlify.app`
 
-### Frontend Deployment (Vercel/Netlify)
+### Environment Variables Required:
 
-1. **Build the Frontend**:
-   ```bash
-   cd frontend
-   npm run build
-   ```
+#### Backend (Render):
+```env
+NODE_ENV=production
+PORT=4000
+MONGODB_URL=mongodb+srv://tanishq2127tanishq_db_user:PixElegant123@cluster0.nl9xgnl.mongodb.net/PixElegant
+ADMIN_EMAIL=pixelegant@gmail.com
+ADMIN_PASSWORD=PixElegant21272127
+JWT_SECRET=WFYVVDFBGVHBUUGDUD
+CLOUDINARY_NAME=dtfjdad4fd
+CLOUDINARY_API_KEY=935529896649521
+CLOUDINARY_API_SECRET=_BE5Bj15IP3FRePlzfMnlnOpqbA
+VITE_FIREBASE_APIKEY=AIzaSyCBTQ4Y-7B_LiwIVIOl7GzrBmVddO3jvHM
+```
 
-2. **Deploy**:
-   - Connect your GitHub repository
-   - Set build command: `npm run build`
-   - Set output directory: `dist`
+#### Frontend & Admin (Netlify):
+```env
+VITE_SERVER_URL=https://your-backend-url.onrender.com
+```
 
-### Admin Panel Deployment
+### Detailed Deployment Instructions
 
-1. **Build the Admin Panel**:
-   ```bash
-   cd admin
-   npm run build
-   ```
+For complete step-by-step deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md)
 
-2. **Deploy**:
-   - Deploy to Vercel/Netlify
-   - Set environment variables
-
-### Database Setup
-
-1. **MongoDB Atlas**:
-   - Create a new cluster
-   - Get connection string
-   - Set up database access
-
-2. **Cloudinary Setup**:
-   - Create Cloudinary account
-   - Get API credentials
-   - Configure in backend
+### Admin Credentials:
+- **Email**: pixelegant@gmail.com
+- **Password**: PixElegant21272127
 
 ## 📸 Screenshots
 

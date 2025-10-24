@@ -27,8 +27,9 @@ app.use(cors({
   origin: [
     "http://localhost:5173",      // frontend dev
     "http://localhost:5175",      // admin dev
-    "https://your-frontend.netlify.app", // Netlify frontend
-    "https://your-admin.netlify.app"     // Netlify admin
+    "https://pixelegant-frontend.netlify.app", // Netlify frontend
+    "https://pixelegant-admin.netlify.app",    // Netlify admin
+    "https://*.netlify.app"       // Allow all Netlify subdomains
   ],
   credentials: true
 }));
@@ -45,10 +46,10 @@ app.use("/api/order", orderRoutes);
 
 // Connect to DB and start server
 const PORT = process.env.PORT || 4000;
-const MONGO_URI = process.env.MONGODB_URI;
+const MONGO_URI = process.env.MONGODB_URI || process.env.MONGODB_URL;
 
 if (!MONGO_URI) {
-  console.error("Error: MONGODB_URI is not set in environment variables");
+  console.error("Error: MONGODB_URI or MONGODB_URL is not set in environment variables");
   process.exit(1); // stop server if no DB connection
 }
 

@@ -1,9 +1,9 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import assets from "../assets/assets.js";
-import { userDataContext } from "../context/userContext.jsx";
+import { userDataContext } from "../context/UserContext.jsx";
 import axios from "axios";
-import { authDataContext } from "../context/authContext.jsx";
+import { authDataContext } from "../context/AuthContext.jsx";
 
 const Nav = () => {
   const [accountMenuOpen, setAccountMenuOpen] = useState(false);

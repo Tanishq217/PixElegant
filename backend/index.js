@@ -24,37 +24,50 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+// ---------------------
 // CORS configuration
+// ---------------------
 const allowedOrigins = [
   "http://localhost:5173",                 // Frontend dev
   "http://localhost:5175",                 // Admin dev
-  "https://pixelegant-frontend.netlify.app", // Netlify frontend
-  "https://pixelegant-admin.netlify.app"     // Netlify admin
+  "https://pixelegant.netlify.app",       // Netlify frontend
+  "https://pixelegant-admin.netlify.app"  // Netlify admin
 ];
 
 app.use(cors({
   origin: function(origin, callback) {
-    // allow requests with no origin (like mobile apps or curl)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error("CORS: Origin not allowed"));
     }
   },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// Handle preflight requests for all routes
+app.options("*", cors({
+  origin: allowedOrigins,
   credentials: true
 }));
 
 // Serve static uploads
 app.use('/uploads', express.static(path.join(__dirname, 'public')));
 
+// ---------------------
 // API Routes
+// ---------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/order", orderRoutes);
 
-// Connect to MongoDB and start server
+// ---------------------
+// Connect to MongoDB & Start Server
+// ---------------------
 const PORT = process.env.PORT || 4000;
 const MONGO_URI = process.env.MONGODB_URI || process.env.MONGODB_URL;
 

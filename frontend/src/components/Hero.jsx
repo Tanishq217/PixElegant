@@ -1,7 +1,7 @@
 import React from "react";
 import heroVideo from "../assets/Video/PIXELEGANT.mp4";
 
-function Hero() {
+function Hero({ heroCount, setHeroCount }) {
   return (
     // Calculate height as viewport minus navbar (64px)
     <section

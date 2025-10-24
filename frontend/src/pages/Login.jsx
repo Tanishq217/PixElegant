@@ -54,6 +54,8 @@ function Login() {
     e.preventDefault();
     setError("");
     try {
+      console.log("Attempting login with:", { email, password, serverURL });
+      
       const result = await axios.post(
         `${serverURL}/api/auth/login`,
         { email, password },
@@ -62,7 +64,11 @@ function Login() {
       console.log("Login successful:", result.data);
 
       setLoggedInUser(result.data);
+      
+      console.log("Calling getCurrentUser...");
       await getCurrentUser();
+      
+      console.log("Navigating to /home...");
       navigate("/home");
     } catch (err) {
       console.error("Login error:", err.response?.data || err.message);

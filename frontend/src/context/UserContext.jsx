@@ -25,8 +25,13 @@ function UserContext({ children }) {
     }
   };
 
+  // Only try to get current user if we have a token
   useEffect(() => {
-    getCurrentUser();
+    // Check if there's a token in cookies first
+    const hasToken = document.cookie.includes('token=');
+    if (hasToken) {
+      getCurrentUser();
+    }
   }, []);
 
   return (

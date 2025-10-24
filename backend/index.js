@@ -2,14 +2,16 @@ import express from 'express';
 import dotenv from 'dotenv';
 import connectDb from './config/db.js';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Routes
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import cors from 'cors';
 
 dotenv.config();
 
@@ -22,41 +24,52 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-// CORS — configured for production deployment
+// CORS configuration
+const allowedOrigins = [
+  "http://localhost:5173",                 // Frontend dev
+  "http://localhost:5175",                 // Admin dev
+  "https://pixelegant-frontend.netlify.app", // Netlify frontend
+  "https://pixelegant-admin.netlify.app"     // Netlify admin
+];
+
 app.use(cors({
-  origin: [
-    "http://localhost:5173",      // frontend dev
-    "http://localhost:5175",      // admin dev
-    "https://pixelegant-frontend.netlify.app", // Netlify frontend
-    "https://pixelegant-admin.netlify.app",    // Netlify admin
-    "https://*.netlify.app"       // Allow all Netlify subdomains
-  ],
+  origin: function(origin, callback) {
+    // allow requests with no origin (like mobile apps or curl)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS: Origin not allowed"));
+    }
+  },
   credentials: true
 }));
 
-// Serve static files (uploads)
+// Serve static uploads
 app.use('/uploads', express.static(path.join(__dirname, 'public')));
 
-// Routes
+// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/order", orderRoutes);
 
-// Connect to DB and start server
+// Connect to MongoDB and start server
 const PORT = process.env.PORT || 4000;
 const MONGO_URI = process.env.MONGODB_URI || process.env.MONGODB_URL;
 
 if (!MONGO_URI) {
   console.error("Error: MONGODB_URI or MONGODB_URL is not set in environment variables");
-  process.exit(1); // stop server if no DB connection
+  process.exit(1);
 }
 
-connectDb(MONGO_URI).then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+connectDb(MONGO_URI)
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error("MongoDB connection failed:", err);
+    process.exit(1);
   });
-}).catch(err => {
-  console.error("DB connection failed:", err);
-});

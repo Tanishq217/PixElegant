@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixElegant API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .loading { background-color: #fff3cd; border-color: #ffeaa7; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>PixElegant API Test Page</h1>
+    
+    <div class="test-section">
+        <h3>Backend Connection Test</h3>
+        <button onclick="testBackendConnection()">Test Backend</button>
+        <div id="backend-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>User Registration Test</h3>
+        <button onclick="testRegistration()">Test Registration</button>
+        <div id="registration-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>User Login Test</h3>
+        <button onclick="testLogin()">Test Login</button>
+        <div id="login-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Admin Login Test</h3>
+        <button onclick="testAdminLogin()">Test Admin Login</button>
+        <div id="admin-login-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>Product List Test</h3>
+        <button onclick="testProductList()">Test Product List</button>
+        <div id="product-list-result"></div>
+    </div>
+
+    <script>
+        const BACKEND_URL = 'https://pixelegant-clothing-app.onrender.com';
+        
+        function showResult(elementId, success, message, data = null) {
+            const element = document.getElementById(elementId);
+            element.className = success ? 'success' : 'error';
+            element.innerHTML = `
+                <strong>${success ? 'SUCCESS' : 'ERROR'}:</strong> ${message}
+                ${data ? `<pre>${JSON.stringify(data, null, 2)}</pre>` : ''}
+            `;
+        }
+
+        function showLoading(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.className = 'loading';
+            element.innerHTML = `<strong>LOADING:</strong> ${message}`;
+        }
+
+        async function testBackendConnection() {
+            showLoading('backend-result', 'Testing backend connection...');
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/product/list`);
+                const data = await response.json();
+                showResult('backend-result', true, 'Backend is accessible', data);
+            } catch (error) {
+                showResult('backend-result', false, `Backend connection failed: ${error.message}`);
+            }
+        }
+
+        async function testRegistration() {
+            showLoading('registration-result', 'Testing user registration...');
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/auth/registration`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        name: 'Test User',
+                        email: `test${Date.now()}@example.com`,
+                        password: 'test123'
+                    })
+                });
+                const data = await response.json();
+                showResult('registration-result', response.ok, 
+                    response.ok ? 'Registration successful' : 'Registration failed', data);
+            } catch (error) {
+                showResult('registration-result', false, `Registration error: ${error.message}`);
+            }
+        }
+
+        async function testLogin() {
+            showLoading('login-result', 'Testing user login...');
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'test123'
+                    })
+                });
+                const data = await response.json();
+                showResult('login-result', response.ok, 
+                    response.ok ? 'Login successful' : 'Login failed', data);
+            } catch (error) {
+                showResult('login-result', false, `Login error: ${error.message}`);
+            }
+        }
+
+        async function testAdminLogin() {
+            showLoading('admin-login-result', 'Testing admin login...');
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/auth/adminlogin`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        email: 'pixelegant@gmail.com',
+                        password: 'PixElegant21272127'
+                    })
+                });
+                const data = await response.json();
+                showResult('admin-login-result', response.ok, 
+                    response.ok ? 'Admin login successful' : 'Admin login failed', data);
+            } catch (error) {
+                showResult('admin-login-result', false, `Admin login error: ${error.message}`);
+            }
+        }
+
+        async function testProductList() {
+            showLoading('product-list-result', 'Testing product list...');
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/product/list`);
+                const data = await response.json();
+                showResult('product-list-result', true, 
+                    `Found ${Array.isArray(data) ? data.length : 'unknown'} products`, data);
+            } catch (error) {
+                showResult('product-list-result', false, `Product list error: ${error.message}`);
+            }
+        }
+
+        // Auto-run backend connection test on page load
+        window.onload = () => {
+            testBackendConnection();
+        };
+    </script>
+</body>
+</html>

@@ -21,6 +21,8 @@ function Login() {
     setLoading(true);
 
     try {
+      console.log("Attempting admin login with:", { email, password, serverURL });
+      
       const result = await axios.post(
         `${serverURL}/api/auth/adminlogin`,
         { email, password },
@@ -30,7 +32,10 @@ function Login() {
       console.log("Admin login successful:", result.data);
       
       // Fetch admin data and redirect to home
+      console.log("Calling getCurrentUser...");
       await getCurrentUser();
+      
+      console.log("Navigating to /home...");
       navigate("/home");
 
     } catch (err) {

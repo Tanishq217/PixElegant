@@ -7,7 +7,7 @@ import Orders from './pages/Orders.jsx'
 import Login from './pages/Login.jsx'
 import { userDataContext } from './context/userContext.jsx'
 import About from './pages/About.jsx'
-import Collections from './pages/collections.jsx'
+import Collections from './pages/Collections.jsx'
 import Product from './pages/Product.jsx'
 import Contact from './pages/Contact.jsx'
 

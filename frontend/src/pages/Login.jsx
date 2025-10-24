@@ -1,10 +1,10 @@
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { authDataContext } from "../context/authContext.jsx";
+import { authDataContext } from "../context/AuthContext.jsx";
 import axios from "axios";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../utils/Firebase.js";
-import { userDataContext } from "../context/userContext.jsx";
+import { userDataContext } from "../context/UserContext.jsx";
 
 function Login() {
   const { serverURL } = useContext(authDataContext);

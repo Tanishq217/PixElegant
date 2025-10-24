@@ -1,5 +1,5 @@
 import React from "react";
-import heroVideo from "../assets/video/PIXELEGANT.mp4";
+import heroVideo from "../assets/Video/PIXELEGANT.mp4";
 
 function Hero() {
   return (

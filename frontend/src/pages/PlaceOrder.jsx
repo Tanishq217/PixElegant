@@ -1,213 +1,147 @@
-import React, { useContext, useState } from 'react'
-import Title from '../components/Title'
-import CartTotal from '../components/CartTotal'
-import { shopDataContext } from '../context/ShopContext'
-import { authDataContext } from '../context/AuthContext'
-import axios from 'axios'
-import { useNavigate } from 'react-router-dom'
-import { toast } from 'react-toastify'
-import Loading from '../components/Loading'
+import React, { useContext, useState } from 'react';
+import Title from '../components/Title';
+import CartTotal from '../components/CartTotal';
+// --- FIX: Import the correct context name ---
+import { ShopContext } from '../context/ShopContext'; // Changed from shopDataContext
+// --- END OF FIX ---
+import { authDataContext } from '../context/AuthContext';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import Loading from '../components/Loading'; // Assuming you have a Loading component
 
 function PlaceOrder() {
-    let navigate = useNavigate()
-    const {cartItem, setCartItem, getCartAmount, delivery_fee, products} = useContext(shopDataContext)
-    let {serverURL} = useContext(authDataContext)
-    let [loading, setLoading] = useState(false)
+    // --- FIX: Use the correct context name ---
+    const { getTotalCartAmount, all_product, cartItems } = useContext(ShopContext); // Changed from shopDataContext
+    // --- END OF FIX ---
+    const { serverURL } = useContext(authDataContext);
+    const navigate = useNavigate();
 
-    let [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        street: '',
-        city: '',
-        state: '',
-        pinCode: '',
-        country: '',
-        phone: ''
-    })
+    const [data, setData] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        street: "",
+        city: "",
+        state: "",
+        zipCode: "",
+        country: "",
+        phone: ""
+    });
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
-    const onChangeHandler = (e) => {
-        const name = e.target.name;
-        const value = e.target.value;
-        setFormData(data => ({...data, [name]: value}))
-    }
+    const onChangeHandler = (event) => {
+        const { name, value } = event.target;
+        setData(prevData => ({ ...prevData, [name]: value }));
+    };
 
-    const onSubmitHandler = async (e) => {
-        setLoading(true)
-        e.preventDefault()
-        
-        try {
-            let orderItems = []
-            for(const items in cartItem){
-                for(const item in cartItem[items]){
-                    if(cartItem[items][item] > 0){
-                        const itemInfo = structuredClone(products.find(product => product._id === items))
-                        if(itemInfo){
-                            itemInfo.size = item
-                            itemInfo.quantity = cartItem[items][item]
-                            orderItems.push(itemInfo)
-                        }
-                    }
-                }
+    const placeOrder = async (event) => {
+        event.preventDefault();
+        setLoading(true);
+        setError("");
+
+        let orderItems = [];
+        all_product.forEach((item) => {
+            if (cartItems[item._id] > 0) {
+                let itemInfo = { ...item, quantity: cartItems[item._id] };
+                orderItems.push(itemInfo);
             }
-            
-            let orderData = {
-                address: formData,
-                items: orderItems,
-                amount: getCartAmount() + delivery_fee,
-                paymentMethod: 'Cash on Delivery'
-            }
+        });
 
-            const result = await axios.post(serverURL + "/api/order/placeorder", orderData, {withCredentials: true})
-            console.log("Order result:", result.data)
-            
-            if(result.data){
-                setCartItem({})
-                toast.success("Order Placed Successfully!")
-                navigate("/order")
-            } else {
-                console.log(result.data.message)
-                toast.error("Order Placement Error")
-            }
-        } catch (error) {
-            console.log("Order error:", error)
-            toast.error("Failed to place order. Please try again.")
-        } finally {
-            setLoading(false)
+        let orderData = {
+            address: data,
+            items: orderItems,
+            amount: getTotalCartAmount() + 50, // Assuming 50 is delivery charge
+        };
+
+        const token = localStorage.getItem('token');
+        if (!token) {
+            setError("Authentication required to place order.");
+            setLoading(false);
+            return;
         }
-    }
+
+        try {
+            console.log("Placing order with data:", orderData);
+            const response = await axios.post(
+                `${serverURL}/api/order/place`,
+                orderData,
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            console.log("Order response:", response.data);
+
+            if (response.data.success) {
+                // Handle successful order placement (e.g., clear cart, redirect, show success message)
+                alert("Order placed successfully!"); // Replace with better UX
+                // navigate('/myorders'); // Or wherever you want to redirect
+                // Optionally clear cart data here
+            } else {
+                setError(response.data.message || "Failed to place order.");
+            }
+        } catch (err) {
+            console.error("Error placing order:", err);
+            setError("An error occurred while placing the order. " + (err.response?.data?.message || err.message));
+             if (err.response?.status === 401) {
+                 localStorage.removeItem('token');
+                 navigate('/login'); // Redirect to login if unauthorized
+             }
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     return (
-        <div className='w-full min-h-screen bg-white pt-20 pb-20'>
-            <div className='max-w-6xl mx-auto px-4'>
-                <div className='flex flex-col lg:flex-row gap-12'>
-                    {/* Delivery Information Form */}
-                    <div className='lg:w-1/2'>
-                        <div className='mb-8'>
-                            <Title text1={'DELIVERY'} text2={'INFORMATION'}/>
-                        </div>
-                        
-                        <form onSubmit={onSubmitHandler} className='space-y-6'>
-                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                <input 
-                                    type="text" 
-                                    placeholder='First name' 
-                                    className='w-full h-12 px-4 rounded-md border border-gray-300 focus:border-black focus:outline-none' 
-                                    required 
-                                    onChange={onChangeHandler} 
-                                    name='firstName' 
-                                    value={formData.firstName}
-                                />
-                                <input 
-                                    type="text" 
-                                    placeholder='Last name' 
-                                    className='w-full h-12 px-4 rounded-md border border-gray-300 focus:border-black focus:outline-none' 
-                                    required 
-                                    onChange={onChangeHandler} 
-                                    name='lastName' 
-                                    value={formData.lastName} 
-                                />
-                            </div>
+        <div className="py-12 px-4 md:px-10 bg-gray-50 min-h-screen">
+            <Title title="Place Your Order" />
 
-                            <input 
-                                type="email" 
-                                placeholder='Email address' 
-                                className='w-full h-12 px-4 rounded-md border border-gray-300 focus:border-black focus:outline-none' 
-                                required 
-                                onChange={onChangeHandler} 
-                                name='email' 
-                                value={formData.email} 
-                            />
-
-                            <input 
-                                type="text" 
-                                placeholder='Street Address' 
-                                className='w-full h-12 px-4 rounded-md border border-gray-300 focus:border-black focus:outline-none' 
-                                required 
-                                onChange={onChangeHandler} 
-                                name='street' 
-                                value={formData.street} 
-                            />
-
-                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                <input 
-                                    type="text" 
-                                    placeholder='City' 
-                                    className='w-full h-12 px-4 rounded-md border border-gray-300 focus:border-black focus:outline-none' 
-                                    required 
-                                    onChange={onChangeHandler} 
-                                    name='city' 
-                                    value={formData.city} 
-                                />
-                                <input 
-                                    type="text" 
-                                    placeholder='State' 
-                                    className='w-full h-12 px-4 rounded-md border border-gray-300 focus:border-black focus:outline-none' 
-                                    required 
-                                    onChange={onChangeHandler} 
-                                    name='state' 
-                                    value={formData.state} 
-                                />
-                            </div>
-
-                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                <input 
-                                    type="text" 
-                                    placeholder='Pincode' 
-                                    className='w-full h-12 px-4 rounded-md border border-gray-300 focus:border-black focus:outline-none' 
-                                    required 
-                                    onChange={onChangeHandler} 
-                                    name='pinCode' 
-                                    value={formData.pinCode} 
-                                />
-                                <input 
-                                    type="text" 
-                                    placeholder='Country' 
-                                    className='w-full h-12 px-4 rounded-md border border-gray-300 focus:border-black focus:outline-none' 
-                                    required 
-                                    onChange={onChangeHandler} 
-                                    name='country' 
-                                    value={formData.country} 
-                                />
-                            </div>
-
-                            <input 
-                                type="text" 
-                                placeholder='Phone Number' 
-                                className='w-full h-12 px-4 rounded-md border border-gray-300 focus:border-black focus:outline-none' 
-                                required 
-                                onChange={onChangeHandler} 
-                                name='phone' 
-                                value={formData.phone} 
-                            />
-
-                            <button 
-                                type='submit' 
-                                disabled={loading}
-                                className='w-full bg-black text-white py-3 px-6 rounded-lg font-semibold hover:bg-gray-800 transition-colors disabled:bg-gray-400 flex items-center justify-center gap-2'
-                            >
-                                {loading ? <Loading/> : "PLACE ORDER"}
-                            </button>
-                        </form>
+            <form onSubmit={placeOrder} className="place-order max-w-4xl mx-auto flex flex-col md:flex-row gap-8 md:gap-12 mt-8">
+                {/* Left Side: Delivery Information */}
+                <div className="place-order-left flex-1 space-y-4">
+                    <h2 className="text-xl font-bold mb-4 text-gray-800 border-b pb-2">Delivery Information</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input required name='firstName' onChange={onChangeHandler} value={data.firstName} type="text" placeholder='First Name' className='border border-gray-300 p-2 rounded focus:outline-none focus:ring-1 focus:ring-black' />
+                        <input required name='lastName' onChange={onChangeHandler} value={data.lastName} type="text" placeholder='Last Name' className='border border-gray-300 p-2 rounded focus:outline-none focus:ring-1 focus:ring-black' />
                     </div>
-
-                    {/* Order Summary */}
-                    <div className='lg:w-1/2'>
-                        <div className='bg-gray-50 p-6 rounded-lg'>
-                            <Title text1={'ORDER'} text2={'SUMMARY'}/>
-                            <CartTotal/>
-                            
-                            <div className='mt-6 p-4 bg-green-50 border border-green-200 rounded-lg'>
-                                <h3 className='text-lg font-semibold text-green-800 mb-2'>Payment Method</h3>
-                                <p className='text-green-700'>Cash on Delivery</p>
-                                <p className='text-sm text-green-600 mt-2'>You will pay when your order is delivered</p>
-                            </div>
-                        </div>
+                    <input required name='email' onChange={onChangeHandler} value={data.email} type="email" placeholder='Email address' className='border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-1 focus:ring-black' />
+                    <input required name='street' onChange={onChangeHandler} value={data.street} type="text" placeholder='Street' className='border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-1 focus:ring-black' />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input required name='city' onChange={onChangeHandler} value={data.city} type="text" placeholder='City' className='border border-gray-300 p-2 rounded focus:outline-none focus:ring-1 focus:ring-black' />
+                        <input required name='state' onChange={onChangeHandler} value={data.state} type="text" placeholder='State' className='border border-gray-300 p-2 rounded focus:outline-none focus:ring-1 focus:ring-black' />
                     </div>
+                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <input required name='zipCode' onChange={onChangeHandler} value={data.zipCode} type="text" placeholder='Zip code' className='border border-gray-300 p-2 rounded focus:outline-none focus:ring-1 focus:ring-black' />
+                        <input required name='country' onChange={onChangeHandler} value={data.country} type="text" placeholder='Country' className='border border-gray-300 p-2 rounded focus:outline-none focus:ring-1 focus:ring-black' />
+                    </div>
+                    <input required name='phone' onChange={onChangeHandler} value={data.phone} type="text" placeholder='Phone' className='border border-gray-300 p-2 rounded w-full focus:outline-none focus:ring-1 focus:ring-black' />
+
+                    {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
+                    {/* Placeholder for Payment Section if needed later */}
+                     {/* <h2 className="text-xl font-bold mt-8 mb-4 text-gray-800 border-b pb-2">Payment Method</h2> */}
+                     {/* Payment options here */}
                 </div>
-            </div>
+
+                {/* Right Side: Cart Totals */}
+                <div className="place-order-right w-full md:w-1/3">
+                     {/* Use CartTotal component */}
+                    <CartTotal />
+                    <button
+                        type='submit'
+                        disabled={loading || getTotalCartAmount() === 0} // Disable if loading or cart empty
+                        className={`w-full mt-6 py-3 px-4 rounded font-semibold text-white transition-colors duration-200 flex items-center justify-center gap-2 ${
+                            loading || getTotalCartAmount() === 0
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-black hover:bg-gray-800'
+                        }`}
+                    >
+                       {loading ? <Loading/> : "PLACE ORDER"}
+                    </button>
+                </div>
+            </form>
         </div>
-    )
+    );
 }
 
-export default PlaceOrder
+export default PlaceOrder;

@@ -1,14 +1,14 @@
 import React, { useContext, useEffect, useState } from 'react';
 import Title from './Title';
 // --- FIX: Import the correct context name ---
-import { ShopContext } from '../context/ShopContext'; // Changed from shopDataContext
+import { ShopContext } from '../context/ShopContext';// Changed from shopDataContext
 // --- END OF FIX ---
 import Card from './Card';
 import Loading from './Loading'; // Import Loading component
 
 function LatestCollection() {
   // --- FIX: Use the correct context name ---
-  const { all_product, loading, error } = useContext(ShopContext); // Changed from shopDataContext
+  const { all_product, loading, error } = useContext(ShopContext);// Changed from shopDataContext
   // --- END OF FIX ---
 
   const [latestProducts, setLatestProducts] = useState([]);

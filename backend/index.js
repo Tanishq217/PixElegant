@@ -25,8 +25,6 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-// --- THIS IS THE FIX ---
-
 // CORS configuration
 const allowedOrigins = new Set([
   "http://localhost:5173",       // Frontend dev
@@ -35,10 +33,10 @@ const allowedOrigins = new Set([
   // ---> Make SURE this exact URL is present <---
   "https://adminpix.netlify.app",               // Your main admin site 
   
-  "https://pixelegant.netlify.app"              // Your main frontend site
+  "https://pixelegant.netlify.app",              // Your main frontend site
   
   // You might keep the preview URL if you test previews often, or remove it.
-  // "https://68fca34f2f47e961a6604873--adminpix.netlify.app", 
+  "https://68fca34f2f47e961a6604873--adminpix.netlify.app", 
 ]);
 
 const corsOptions = {
@@ -63,8 +61,12 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions)); // Handles OPTIONS requests
 
 
+// --- THIS IS THE FIX ---
 // Serve static uploads
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
+// Changed 'public/uploads' to just 'public' to match your multer config
+app.use('/uploads', express.static(path.join(__dirname, 'public')));
+// --- END OF FIX ---
+
 
 // API Routes
 app.use("/api/auth", authRoutes);

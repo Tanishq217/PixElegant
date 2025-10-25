@@ -32,24 +32,27 @@ const allowedOrigins = new Set([
   "http://localhost:5173",       // Frontend dev
   "http://localhost:5175",       // Admin dev
   
-  // Add your Netlify URLs here:
-  "https://adminpix.netlify.app",               // Your main admin site
-  "https://68fca34f2f47e961a6604873--adminpix.netlify.app", // The deploy preview from the error
-  "https://pixelegant.netlify.app"              // Assuming this is your main frontend site
+  // ---> Make SURE this exact URL is present <---
+  "https://adminpix.netlify.app",               // Your main admin site 
+  
+  "https://pixelegant.netlify.app"              // Your main frontend site
+  
+  // You might keep the preview URL if you test previews often, or remove it.
+  // "https://68fca34f2f47e961a6604873--adminpix.netlify.app", 
 ]);
 
 const corsOptions = {
   origin: (origin, callback) => {
     // Allow requests with no origin OR from allowed origins
     if (!origin || allowedOrigins.has(origin)) {
-      console.log(`CORS: Allowed origin: ${origin || 'N/A'}`); // Log allowed origins
+      console.log(`CORS: Allowed origin: ${origin || 'N/A'}`); 
       callback(null, true);
     } else {
-      console.error(`CORS: Blocked origin: ${origin}`); // Log blocked origins
+      console.error(`CORS: Blocked origin: ${origin}`); 
       callback(new Error(`CORS: Origin ${origin} not allowed`));
     }
   },
-  credentials: true, // IMPORTANT for cookies
+  credentials: true, 
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "Accept", "X-Requested-With"]
 };
@@ -58,8 +61,6 @@ app.use(cors(corsOptions));
 
 // Handle preflight requests explicitly for all routes
 app.options('*', cors(corsOptions)); // Handles OPTIONS requests
-
-// --- END OF FIX ---
 
 
 // Serve static uploads

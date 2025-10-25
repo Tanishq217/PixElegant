@@ -1,4 +1,3 @@
-// backend/controller/productController.js
 import uploadOnCloudinary from "../config/cloudinary.js";
 import Product from "../model/productModel.js";
 
@@ -11,37 +10,14 @@ export const addProduct = async (req, res) => {
     let { name, description, price, category, subCategory, sizes, bestseller } = req.body;
 
     // Validate required fields
-    if (!name || !description || !price || !category || !subCategory) {
-      return res.status(400).json({ message: "All text fields are required" });
+    if (!name || !description || !price || !category || !subCategory || !sizes) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     // Validate files
     if (!req.files || !req.files.image1 || !req.files.image2 || !req.files.image3 || !req.files.image4) {
       return res.status(400).json({ message: "All 4 images are required" });
     }
-
-    // --- FIX: Safely parse 'sizes' ---
-    let parsedSizes;
-    try {
-        // Ensure 'sizes' is a string and not empty before parsing
-        if (typeof sizes === 'string' && sizes.trim() !== '') {
-            parsedSizes = JSON.parse(sizes);
-        } else if (Array.isArray(sizes)) {
-            parsedSizes = sizes; // Already an array, unlikely but safe
-        } else {
-            parsedSizes = []; // Default to empty array
-        }
-    } catch (parseError) {
-        console.log("Error parsing sizes:", parseError.message, "Received:", sizes);
-        return res.status(400).json({ message: "Invalid format for sizes. Expected a JSON array string." });
-    }
-    
-    // Frontend validation should catch this, but double-check on backend
-    if (parsedSizes.length === 0) {
-        return res.status(400).json({ message: "Please select at least one size" });
-    }
-    // --- END OF FIX ---
-
 
     // Try Cloudinary upload first
     let image1, image2, image3, image4;
@@ -55,8 +31,8 @@ export const addProduct = async (req, res) => {
       
       if (image1 && image2 && image3 && image4) {
         console.log("✅ Cloudinary upload successful");
+        console.log("Image URLs:", { image1, image2, image3, image4 });
       } else {
-        // This 'else' will be hit if any upload returns null/undefined
         throw new Error("One or more images failed to upload to Cloudinary");
       }
     } catch (cloudinaryError) {
@@ -70,19 +46,14 @@ export const addProduct = async (req, res) => {
       image4 = `/uploads/${req.files.image4[0].filename}`;
     }
 
-    // --- FIX: Safer boolean conversion for 'bestseller' ---
-    // FormData sends booleans as strings "true" or "false"
-    const isBestseller = bestseller === "true" || bestseller === true;
-    // --- END OF FIX ---
-
     let productData = {
       name: name.trim(),
       description: description.trim(),
       price: Number(price),
       category,
       subCategory,
-      sizes: parsedSizes, // Use the safely parsed array
-      bestseller: isBestseller, // Use the safer boolean
+      sizes: JSON.parse(sizes),
+      bestseller: bestseller === "true",
       date: Date.now(),
       image1,
       image2,
@@ -97,10 +68,8 @@ export const addProduct = async (req, res) => {
     console.log("Product created successfully:", product);
 
     return res.status(201).json(product);
-
   } catch (error) {
-    // This is the outer catch block that sends the 500 error
-    console.log("addProduct error (uncaught):", error);
+    console.log("addProduct error:", error);
     return res.status(500).json({ message: `AddProduct error: ${error.message}` });
   }
 };

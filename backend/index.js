@@ -1,3 +1,4 @@
+// backend/index.js
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDb from './config/db.js';
@@ -5,7 +6,6 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import fs from 'fs'; // <-- Import File System module
 
 // Routes
 import authRoutes from './routes/authRoutes.js';
@@ -21,40 +21,38 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// --- FIX: Ensure 'public' directory exists ---
-const publicDir = path.join(__dirname, 'public');
-if (!fs.existsSync(publicDir)){
-    console.log(`Creating directory: ${publicDir}`);
-    fs.mkdirSync(publicDir, { recursive: true }); // Create directory if it doesn't exist
-} else {
-    console.log(`Directory already exists: ${publicDir}`);
-}
-// --- END OF FIX ---
-
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
 
-// CORS configuration (Keep your existing correct setup)
+// --- THIS IS THE FIX ---
+
+// CORS configuration
 const allowedOrigins = new Set([
-  "http://localhost:5173",
-  "http://localhost:5175",
-  "https://adminpix.netlify.app",
-  "https://pixelegant.netlify.app",
-  "https://68fca34f2f47e961a6604873--adminpix.netlify.app", // Keep preview if needed
+  "http://localhost:5173",       // Frontend dev
+  "http://localhost:5175",       // Admin dev
+  
+  // ---> Make SURE this exact URL is present <---
+  "https://adminpix.netlify.app",               // Your main admin site 
+  
+  "https://pixelegant.netlify.app"              // Your main frontend site
+  
+  // You might keep the preview URL if you test previews often, or remove it.
+  // "https://68fca34f2f47e961a6604873--adminpix.netlify.app", 
 ]);
 
 const corsOptions = {
   origin: (origin, callback) => {
+    // Allow requests with no origin OR from allowed origins
     if (!origin || allowedOrigins.has(origin)) {
-      console.log(`CORS: Allowed origin: ${origin || 'N/A'}`);
+      console.log(`CORS: Allowed origin: ${origin || 'N/A'}`); 
       callback(null, true);
     } else {
-      console.error(`CORS: Blocked origin: ${origin}`);
+      console.error(`CORS: Blocked origin: ${origin}`); 
       callback(new Error(`CORS: Origin ${origin} not allowed`));
     }
   },
-  credentials: true,
+  credentials: true, 
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "Accept", "X-Requested-With"]
 };
@@ -62,12 +60,11 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Handle preflight requests explicitly for all routes
-app.options('*', cors(corsOptions));
+app.options('*', cors(corsOptions)); // Handles OPTIONS requests
 
 
-// Serve static uploads (Keep the fix from before)
-app.use('/uploads', express.static(publicDir)); // Use the variable defined above
-
+// Serve static uploads
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // API Routes
 app.use("/api/auth", authRoutes);
@@ -80,6 +77,7 @@ app.use("/api/order", orderRoutes);
 app.get('/health', (req, res) => res.json({ ok: true }));
 
 // Connect to MongoDB & Start Server
+// ... (rest of your connection logic) ...
 const PORT = parseInt(process.env.PORT || '4000', 10);
 const MONGO_URI = process.env.MONGODB_URI || process.env.MONGODB_URL;
 

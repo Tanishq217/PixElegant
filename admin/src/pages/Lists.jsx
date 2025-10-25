@@ -1,126 +1,148 @@
-import React, { useContext, useState, useEffect } from 'react'
-import Nav from '../component/Nav'
-import Sidebar from '../component/Sidebar'
-import { authDataContext } from '../context/authContext'
-import axios from 'axios'
-import { toast, ToastContainer } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+import React, { useState, useEffect, useContext } from "react"; // <-- Add useContext
+import { authDataContext } from "../context/authContext"; // <-- Import AuthContext
+import axios from "axios";
+import Loading from '../component/Loading';
 
 function Lists() {
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const { serverURL } = useContext(authDataContext)
+  const { serverURL } = useContext(authDataContext); // <-- Get serverURL from context
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const fetchProducts = async () => {
+    setLoading(true);
+    setError("");
     try {
-      setLoading(true)
-      const result = await axios.get(serverURL + "/api/product/list")
-      setProducts(result.data)
-      console.log("Products fetched:", result.data)
-    } catch (error) {
-      console.error("Error fetching products:", error)
-      toast.error("Failed to fetch products")
+      const response = await axios.get(`${serverURL}/api/product/listproduct`, {
+        withCredentials: true,
+      });
+      console.log("Fetched products:", response.data);
+      setProducts(response.data);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      setError("Failed to fetch products. " + (err.response?.data?.message || err.message));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  const removeProduct = async (id) => {
+     // Basic confirmation before deleting
+    if (!window.confirm("Are you sure you want to remove this product?")) {
+        return;
+    }
+    try {
+        console.log(`Attempting to remove product with ID: ${id}`);
+        await axios.delete(`${serverURL}/api/product/removeproduct/${id}`, {
+            withCredentials: true,
+        });
+        console.log(`Product ${id} removed successfully.`);
+        // Refetch products to update the list
+        fetchProducts();
+    } catch (err) {
+        console.error("Error removing product:", err);
+        setError("Failed to remove product. " + (err.response?.data?.message || err.message));
+        // Optionally display this error in a more user-friendly way (e.g., toast notification)
+    }
+  };
+
 
   useEffect(() => {
-    fetchProducts()
-  }, [])
+    fetchProducts();
+  }, []); // Empty dependency array ensures this runs only once on mount
 
-  const handleDeleteProduct = async (productId) => {
-    try {
-      await axios.post(`${serverURL}/api/product/remove/${productId}`, {}, { withCredentials: true })
-      toast.success("Product deleted successfully")
-      fetchProducts() // Refresh the list
-    } catch (error) {
-      console.error("Error deleting product:", error)
-      toast.error("Failed to delete product")
+  // --- FIX: Image URL construction logic ---
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) {
+      return ""; // Or a placeholder image URL
     }
+    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+      return imagePath;
+    } else {
+      const imageFullPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+      return `${serverURL}${imageFullPath}`;
+    }
+  };
+  // --- END OF FIX ---
+
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen"><Loading /></div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500 mt-10">{error}</div>;
   }
 
   return (
-    <div className='w-[100vw] min-h-[100vh] bg-white text-black overflow-x-hidden relative'>
-      <Nav/>
-      <Sidebar/>
-      
-      <div className='w-[82%] min-h-[100vh] absolute right-0 top-0 flex flex-col items-center py-[100px] px-[40px] gap-[40px]'>
-        <h1 className='text-4xl md:text-5xl font-bold text-black shadow-md p-4 rounded-lg bg-gray-100 w-full text-center border border-gray-300'>
-          PixElegant Products
-        </h1>
-
-        {loading ? (
-          <div className='flex items-center justify-center h-64'>
-            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-black'></div>
-          </div>
-        ) : (
-          <div className='w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {products.length === 0 ? (
-              <div className='col-span-full text-center py-12'>
-                <p className='text-xl text-gray-500'>No products found</p>
-              </div>
-            ) : (
-              products.map((product) => (
-                <div key={product._id} className='bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition border border-gray-200'>
-                  <div className='h-48 bg-gray-100 flex items-center justify-center'>
-                    <img 
-                      src={product.image1?.startsWith('http') ? product.image1 : `${serverURL}${product.image1}`}
+    <div className="p-6 bg-gray-100 min-h-screen">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Product List</h1>
+      {products.length === 0 ? (
+        <p className="text-center text-gray-500">No products found.</p>
+      ) : (
+        <div className="overflow-x-auto bg-white rounded-lg shadow">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Image
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Name
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Category
+                </th>
+                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Sub-Category
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Price (₹)
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Action
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {products.map((product) => (
+                <tr key={product._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {/* Use the getImageUrl function */}
+                    <img
+                      src={getImageUrl(product.image1)} // Display the first image
                       alt={product.name}
-                      className='w-full h-full object-cover'
-                      onError={(e) => {
-                        e.target.src = '/placeholder-image.jpg';
-                        e.target.alt = 'Image not available';
-                      }}
+                      className="h-16 w-16 object-cover rounded"
                     />
-                  </div>
-                  <div className='p-4'>
-                    <h3 className='text-xl font-semibold mb-2 text-black'>{product.name}</h3>
-                    <p className='text-gray-600 text-sm mb-2 line-clamp-2'>{product.description}</p>
-                    <div className='flex justify-between items-center mb-3'>
-                      <span className='text-lg font-bold text-black'>₹{product.price}</span>
-                      <span className='text-sm text-gray-500'>{product.category}</span>
-                    </div>
-                    <div className='flex flex-wrap gap-1 mb-3'>
-                      {product.sizes.map((size, index) => (
-                        <span key={index} className='px-2 py-1 bg-gray-100 rounded text-xs border border-gray-300'>
-                          {size}
-                        </span>
-                      ))}
-                    </div>
-                    <div className='flex justify-end'>
-                      <button 
-                        onClick={() => handleDeleteProduct(product._id)}
-                        className='bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition-all duration-200 hover:scale-110 shadow-lg'
-                        title="Delete Product"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-      </div>
-      
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">{product.category}</div>
+                  </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">{product.subCategory}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{product.price}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => removeProduct(product._id)}
+                      className="text-red-600 hover:text-red-900 transition-colors duration-200"
+                    >
+                      Remove
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
-  )
+  );
 }
 
-export default Lists
+export default Lists;

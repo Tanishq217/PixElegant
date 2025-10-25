@@ -25,13 +25,17 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
+// --- THIS IS THE FIX ---
+
 // CORS configuration
 const allowedOrigins = new Set([
   "http://localhost:5173",       // Frontend dev
   "http://localhost:5175",       // Admin dev
-  "YOUR_FRONTEND_URL",           // Frontend prod (e.g., https://pixelegant.netlify.app)
-  "YOUR_ADMIN_URL"               // Admin prod (e.g., https://adminpix.netlify.app)
-  // Add any other specific URLs if needed
+  
+  // Add your Netlify URLs here:
+  "https://adminpix.netlify.app",               // Your main admin site
+  "https://68fca34f2f47e961a6604873--adminpix.netlify.app", // The deploy preview from the error
+  "https://pixelegant.netlify.app"              // Assuming this is your main frontend site
 ]);
 
 const corsOptions = {
@@ -55,8 +59,11 @@ app.use(cors(corsOptions));
 // Handle preflight requests explicitly for all routes
 app.options('*', cors(corsOptions)); // Handles OPTIONS requests
 
+// --- END OF FIX ---
+
+
 // Serve static uploads
-app.use('/uploads', express.static(path.join(__dirname, 'public/uploads'))); // Ensure correct path if needed
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 // API Routes
 app.use("/api/auth", authRoutes);

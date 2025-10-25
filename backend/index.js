@@ -29,18 +29,18 @@ app.use(cookieParser());
 // ---------------------
 // CORS configuration
 // ---------------------
-const allowedOrigins = [
+const allowedOrigins = new Set([
   "http://localhost:5173",                 // Frontend dev
   "http://localhost:5175",                 // Admin dev
   "https://pixelegant.netlify.app",       // Frontend prod
   "https://pixelegant-admin.netlify.app", // Old admin prod
   "https://adminpix.netlify.app"          // New admin prod
-];
+]);
 
-app.use(cors({
-  origin: function(origin, callback) {
-    // allow requests with no origin (mobile apps, curl)
-    if (!origin || allowedOrigins.includes(origin)) {
+const corsOptions = {
+  origin: (origin, callback) => {
+    // allow requests with no origin (e.g. Postman, mobile apps, curl)
+    if (!origin || allowedOrigins.has(origin)) {
       callback(null, true);
     } else {
       callback(new Error(`CORS: Origin ${origin} not allowed`));
@@ -48,16 +48,14 @@ app.use(cors({
   },
   credentials: true, // allow cookies
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+  allowedHeaders: ["Content-Type", "Authorization", "Accept", "X-Requested-With"]
+};
 
-// Handle preflight requests for all routes
-app.options("*", cors({
-  origin: allowedOrigins,
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+// Enable CORS globally (this handles preflight OPTIONS too)
+app.use(cors(corsOptions));
+
+// If you need to handle preflight explicitly for a specific path, use '/*' (not '*').
+// In most setups app.use(cors()) is sufficient, so we remove the problematic app.options('*', ...)
 
 // ---------------------
 // Serve static uploads
@@ -74,9 +72,14 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/order", orderRoutes);
 
 // ---------------------
+// Health check (optional)
+// ---------------------
+app.get('/health', (req, res) => res.json({ ok: true }));
+
+// ---------------------
 // Connect to MongoDB & Start Server
 // ---------------------
-const PORT = process.env.PORT || 4000;
+const PORT = parseInt(process.env.PORT || '4000', 10);
 const MONGO_URI = process.env.MONGODB_URI || process.env.MONGODB_URL;
 
 if (!MONGO_URI) {

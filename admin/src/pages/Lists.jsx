@@ -1,10 +1,14 @@
-import React, { useState, useEffect, useContext } from "react"; // <-- Add useContext
-import { authDataContext } from "../context/authContext"; // <-- Import AuthContext
+import React, { useState, useEffect, useContext } from "react";
+// --- FIX: Import the correct context name ---
+import { authDataContext } from "../context/authContext"; // Changed from AuthContext
+// --- END OF FIX ---
 import axios from "axios";
 import Loading from '../component/Loading';
 
 function Lists() {
-  const { serverURL } = useContext(authDataContext); // <-- Get serverURL from context
+  // --- FIX: Use the correct context name ---
+  const { serverURL } = useContext(authDataContext); // Changed from AuthContext
+  // --- END OF FIX ---
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -37,24 +41,20 @@ function Lists() {
             withCredentials: true,
         });
         console.log(`Product ${id} removed successfully.`);
-        // Refetch products to update the list
-        fetchProducts();
+        fetchProducts(); // Refetch products to update the list
     } catch (err) {
         console.error("Error removing product:", err);
         setError("Failed to remove product. " + (err.response?.data?.message || err.message));
-        // Optionally display this error in a more user-friendly way (e.g., toast notification)
     }
   };
 
-
   useEffect(() => {
     fetchProducts();
-  }, []); // Empty dependency array ensures this runs only once on mount
+  }, []);
 
-  // --- FIX: Image URL construction logic ---
   const getImageUrl = (imagePath) => {
     if (!imagePath) {
-      return ""; // Or a placeholder image URL
+      return "";
     }
     if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
       return imagePath;
@@ -63,8 +63,6 @@ function Lists() {
       return `${serverURL}${imageFullPath}`;
     }
   };
-  // --- END OF FIX ---
-
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen"><Loading /></div>;
@@ -84,49 +82,28 @@ function Lists() {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Image
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sub-Category
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price (₹)
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Action
-                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sub-Category</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price (₹)</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {products.map((product) => (
                 <tr key={product._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {/* Use the getImageUrl function */}
                     <img
-                      src={getImageUrl(product.image1)} // Display the first image
+                      src={getImageUrl(product.image1)}
                       alt={product.name}
                       className="h-16 w-16 object-cover rounded"
                     />
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{product.category}</div>
-                  </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">{product.subCategory}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{product.price}</div>
-                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap"><div className="text-sm font-medium text-gray-900">{product.name}</div></td>
+                  <td className="px-6 py-4 whitespace-nowrap"><div className="text-sm text-gray-500">{product.category}</div></td>
+                  <td className="px-6 py-4 whitespace-nowrap"><div className="text-sm text-gray-500">{product.subCategory}</div></td>
+                  <td className="px-6 py-4 whitespace-nowrap"><div className="text-sm text-gray-900">{product.price}</div></td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <button
                       onClick={() => removeProduct(product._id)}

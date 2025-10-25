@@ -1,40 +1,37 @@
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
-import { AuthContext } from "../context/AuthContext"; // Import AuthContext to get serverURL
+// --- FIX: Import the correct context name ---
+import { authDataContext } from "../context/AuthContext"; // Changed from AuthContext
+// --- END OF FIX ---
 
 function Card({ product }) {
-  const { serverURL } = useContext(AuthContext); // Get the backend server URL
+  // --- FIX: Use the correct context name ---
+  const { serverURL } = useContext(authDataContext); // Changed from AuthContext
+  // --- END OF FIX ---
 
-  // --- FIX: Construct the correct image source URL ---
   const getImageUrl = (imagePath) => {
     if (!imagePath) {
-      return ""; // Handle cases where imagePath might be missing
+      return "";
     }
-    // Check if it's a full URL (like Cloudinary's) or a relative path
     if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
-      return imagePath; // It's already a full URL
+      return imagePath;
     } else {
-      // It's a relative path (like /uploads/...), prepend the server URL
-      // Ensure no double slashes if imagePath already starts with /
       const imageFullPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
       return `${serverURL}${imageFullPath}`;
     }
   };
-  // --- END OF FIX ---
 
   return (
     <Link
-      to={`/product/${product._id}`} // Link to product detail page
+      to={`/product/${product._id}`}
       className="card border rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out bg-white flex flex-col h-full"
     >
       <div className="relative w-full aspect-square overflow-hidden">
-        {/* Use the getImageUrl function */}
         <img
-          src={getImageUrl(product.image1)} // Use image1 as the primary card image
+          src={getImageUrl(product.image1)}
           alt={product.name}
           className="w-full h-full object-cover transition-transform duration-300 ease-in-out hover:scale-105"
         />
-        {/* Optional: Add a badge for bestseller */}
         {product.bestseller && (
           <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded">
             Bestseller

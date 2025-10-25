@@ -1,4 +1,3 @@
-// backend/index.js
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDb from './config/db.js';
@@ -6,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs'; // <-- Import File System module
 
 // Routes
 import authRoutes from './routes/authRoutes.js';
@@ -21,31 +21,40 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// --- FIX: Ensure 'public' directory exists ---
+const publicDir = path.join(__dirname, 'public');
+if (!fs.existsSync(publicDir)){
+    console.log(`Creating directory: ${publicDir}`);
+    fs.mkdirSync(publicDir, { recursive: true }); // Create directory if it doesn't exist
+} else {
+    console.log(`Directory already exists: ${publicDir}`);
+}
+// --- END OF FIX ---
+
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
 
-// CORS configuration
+// CORS configuration (Keep your existing correct setup)
 const allowedOrigins = new Set([
-  "http://localhost:5173",       // Frontend dev
-  "http://localhost:5175",       // Admin dev
-  "https://adminpix.netlify.app",               // Your main admin site 
-  "https://pixelegant.netlify.app",              // Your main frontend site
-  "https://68fca34f2f47e961a6604873--adminpix.netlify.app", // Deploy preview
+  "http://localhost:5173",
+  "http://localhost:5175",
+  "https://adminpix.netlify.app",
+  "https://pixelegant.netlify.app",
+  "https://68fca34f2f47e961a6604873--adminpix.netlify.app", // Keep preview if needed
 ]);
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin OR from allowed origins
     if (!origin || allowedOrigins.has(origin)) {
-      console.log(`CORS: Allowed origin: ${origin || 'N/A'}`); 
+      console.log(`CORS: Allowed origin: ${origin || 'N/A'}`);
       callback(null, true);
     } else {
-      console.error(`CORS: Blocked origin: ${origin}`); 
+      console.error(`CORS: Blocked origin: ${origin}`);
       callback(new Error(`CORS: Origin ${origin} not allowed`));
     }
   },
-  credentials: true, 
+  credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "Accept", "X-Requested-With"]
 };
@@ -53,14 +62,11 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Handle preflight requests explicitly for all routes
-app.options('*', cors(corsOptions)); // Handles OPTIONS requests
+app.options('*', cors(corsOptions));
 
 
-// --- THIS IS THE FIX ---
-// Serve static uploads
-// Changed 'public/uploads' to just 'public' to match your multer config
-app.use('/uploads', express.static(path.join(__dirname, 'public')));
-// --- END OF FIX ---
+// Serve static uploads (Keep the fix from before)
+app.use('/uploads', express.static(publicDir)); // Use the variable defined above
 
 
 // API Routes

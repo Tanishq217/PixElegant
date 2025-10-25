@@ -1,4 +1,3 @@
-// backend/index.js
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDb from './config/db.js';
@@ -29,14 +28,9 @@ app.use(cookieParser());
 const allowedOrigins = new Set([
   "http://localhost:5173",       // Frontend dev
   "http://localhost:5175",       // Admin dev
-  
-  // ---> Make SURE this exact URL is present <---
   "https://adminpix.netlify.app",               // Your main admin site 
-  
   "https://pixelegant.netlify.app",              // Your main frontend site
-  
-  // You might keep the preview URL if you test previews often, or remove it.
-  "https://68fca34f2f47e961a6604873--adminpix.netlify.app", 
+  "https://68fca34f2f47e961a6604873--adminpix.netlify.app", // Deploy preview
 ]);
 
 const corsOptions = {
@@ -79,7 +73,6 @@ app.use("/api/order", orderRoutes);
 app.get('/health', (req, res) => res.json({ ok: true }));
 
 // Connect to MongoDB & Start Server
-// ... (rest of your connection logic) ...
 const PORT = parseInt(process.env.PORT || '4000', 10);
 const MONGO_URI = process.env.MONGODB_URI || process.env.MONGODB_URL;
 

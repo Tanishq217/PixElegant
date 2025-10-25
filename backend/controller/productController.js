@@ -11,7 +11,6 @@ export const addProduct = async (req, res) => {
 
     // Validate required fields
     if (!name || !description || !price || !category || !subCategory) {
-      // Note: We'll validate 'sizes' and 'files' separately
       return res.status(400).json({ message: "All text fields are required" });
     }
 
@@ -55,7 +54,6 @@ export const addProduct = async (req, res) => {
       
       if (image1 && image2 && image3 && image4) {
         console.log("✅ Cloudinary upload successful");
-        console.log("Image URLs:", { image1, image2, image3, image4 });
       } else {
         // This 'else' will be hit if any upload returns null/undefined
         throw new Error("One or more images failed to upload to Cloudinary");
@@ -65,7 +63,6 @@ export const addProduct = async (req, res) => {
       console.log("Using local file paths as fallback");
       
       // Fallback to local storage
-      // Note: This relies on the 'public' folder existing on Render
       image1 = `/uploads/${req.files.image1[0].filename}`;
       image2 = `/uploads/${req.files.image2[0].filename}`;
       image3 = `/uploads/${req.files.image3[0].filename}`;

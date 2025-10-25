@@ -1,125 +1,120 @@
-import React, { useContext, useEffect, useState } from 'react'
-import Title from '../components/Title'
-import { shopDataContext } from '../context/ShopContext'
-import { useNavigate } from 'react-router-dom'
-import { RiDeleteBin6Line } from "react-icons/ri";
-import CartTotal from '../components/CartTotal';
-import { authDataContext } from '../context/AuthContext';
+import React, { useContext } from "react";
+import { ShopContext } from "../context/ShopContext";
+import { authDataContext } from "../context/AuthContext"; // Import AuthContext for serverURL
+import { IoTrashOutline } from "react-icons/io5"; // Using react-icons for remove icon
+import CartTotal from "../components/CartTotal";
+import Loading from "../components/Loading"; // Import Loading component
 
 function Cart() {
-    const { products, currency, cartItem, updateQuantity } = useContext(shopDataContext)
-    const { serverURL } = useContext(authDataContext)
-    const [cartData, setCartData] = useState([])
-    const navigate = useNavigate()
+  const { all_product, cartItems, removeFromCart, getTotalCartAmount, loading: productsLoading } = useContext(ShopContext); // Get loading state
+  const { serverURL } = useContext(authDataContext); // Get serverURL
 
-    useEffect(() => {
-        const tempData = [];
-        for (const items in cartItem) {
-            for (const item in cartItem[items]) {
-                if (cartItem[items][item] > 0) {
-                    tempData.push({
-                        _id: items,
-                        size: item,
-                        quantity: cartItem[items][item],
-                    });
-                }
-            }
-        }
-        setCartData(tempData); 
-    }, [cartItem]);
+  // --- FIX: Image URL construction logic ---
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) {
+      return ""; // Or a placeholder image URL
+    }
+    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+      return imagePath;
+    } else {
+      const imageFullPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
+      return `${serverURL}${imageFullPath}`;
+    }
+  };
+  // --- END OF FIX ---
 
+  // --- FIX: Handle loading state ---
+  if (productsLoading || !all_product || all_product.length === 0) {
+    // Show loading indicator if products are loading or not yet available
     return (
-        <div className='w-full min-h-screen bg-white pt-20 pb-20'>
-            <div className='max-w-4xl mx-auto px-4'>
-                <div className='text-center mb-12'>
-                    <Title text1={'YOUR'} text2={'CART'} />
-                </div>
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <Loading />
+      </div>
+    );
+  }
+  // --- END OF FIX ---
 
-                <div className='space-y-6 mb-12'>
-                    {
-                        cartData.map((item, index) => {
-                            const productData = products.find((product) => product._id === item._id);
-                            if (!productData) return null;
-                            
-                            const imageUrl = productData.image1?.startsWith('http') ? productData.image1 : `${serverURL}${productData.image1}`;
-                            
-                            return (
-                                <div key={index} className='w-full border border-gray-200 rounded-lg overflow-hidden bg-white shadow-sm'>
-                                    <div className='flex items-center gap-6 p-6'>
-                                        <img 
-                                            className='w-24 h-24 rounded-md object-cover' 
-                                            src={imageUrl} 
-                                            alt={productData.name}
-                                            onError={(e) => {
-                                                e.target.src = '/placeholder-image.jpg';
-                                                e.target.alt = 'Image not available';
-                                            }}
-                                        />
-                                        <div className='flex-1'>
-                                            <h3 className='text-xl font-semibold text-black mb-2'>{productData.name}</h3>
-                                            <div className='flex items-center gap-4'>
-                                                <p className='text-lg font-bold text-black'>{currency} {productData.price}</p>
-                                                <span className='px-3 py-1 bg-gray-100 text-black rounded-md text-sm font-medium'>
-                                                    Size: {item.size}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        
-                                        <div className='flex items-center gap-4'>
-                                            <input 
-                                                type="number" 
-                                                min={1} 
-                                                defaultValue={item.quantity} 
-                                                className='w-16 h-10 px-2 text-center text-black border border-gray-300 rounded-md focus:border-black focus:outline-none' 
-                                                onChange={(e) => {
-                                                    const value = Number(e.target.value);
-                                                    if (value > 0) {
-                                                        updateQuantity(item._id, item.size, value);
-                                                    }
-                                                }} 
-                                            />
-                                            <button 
-                                                className='text-red-500 hover:text-red-700 transition-colors'
-                                                onClick={() => updateQuantity(item._id, item.size, 0)}
-                                            >
-                                                <RiDeleteBin6Line className='w-6 h-6' />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            )
-                        })
-                    }
-                </div>
+  // Get IDs of items currently in the cart
+  const cartItemIds = Object.keys(cartItems).filter(itemId => cartItems[itemId] > 0);
 
-                {cartData.length === 0 && (
-                    <div className='text-center py-12'>
-                        <p className='text-gray-500 text-lg mb-4'>Your cart is empty</p>
-                        <button 
-                            className='bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors'
-                            onClick={() => navigate('/collections')}
-                        >
-                            Continue Shopping
-                        </button>
+  // Check if cart is empty after filtering
+  const isCartEmpty = cartItemIds.length === 0;
+
+  return (
+    <div className="cart-container min-h-screen bg-gray-100 py-10 px-4 md:px-10">
+      <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">Your Cart</h1>
+
+      {isCartEmpty ? (
+        <p className="text-center text-gray-500 text-lg">Your cart is currently empty.</p>
+      ) : (
+        <div className="cart-items bg-white rounded-lg shadow-md p-6 mb-8">
+          {/* Cart Header */}
+          <div className="hidden md:grid grid-cols-6 gap-4 items-center font-semibold text-gray-600 border-b pb-3 mb-4">
+            <span className="col-span-2">Product</span>
+            <span>Price</span>
+            <span>Quantity</span>
+            <span>Total</span>
+            <span>Remove</span>
+          </div>
+
+          {/* Cart Items List - Updated Logic */}
+          {cartItemIds.map((itemId) => {
+              // Find the product details from all_product using the itemId
+              const product = all_product.find((p) => p._id === itemId);
+
+              // --- FIX: Only render if product is found ---
+              if (product && cartItems[itemId] > 0) {
+                return (
+                  <div
+                    key={itemId} // Use itemId as key
+                    className="grid grid-cols-3 md:grid-cols-6 gap-4 items-center border-b py-4 cart-item-entry"
+                  >
+                    {/* Product Image & Name (Combined for mobile) */}
+                    <div className="col-span-3 md:col-span-2 flex items-center space-x-4">
+                      <img
+                        src={getImageUrl(product.image1)}
+                        alt={product.name}
+                        className="w-16 h-16 object-cover rounded"
+                      />
+                      <span className="text-sm font-medium text-gray-800">{product.name}</span>
                     </div>
-                )}
 
-                {cartData.length > 0 && (
-                    <div className='flex justify-end'>
-                        <div className='w-full sm:w-96'>
-                            <CartTotal/>
-                            <button 
-                                className='w-full bg-black text-white py-3 px-6 rounded-lg hover:bg-gray-800 transition-colors font-semibold mt-4' 
-                                onClick={() => navigate("/placeorder")}
-                            >
-                                PROCEED TO CHECKOUT
-                            </button>
-                        </div>
-                    </div>
-                )}
-            </div>
+                    {/* Price (Visible on larger screens) */}
+                    <span className="hidden md:block text-center text-gray-700">₹{product.price}</span>
+
+                    {/* Quantity */}
+                    <span className="text-center">
+                      <button className="border rounded px-2 py-1 text-gray-700">{cartItems[itemId]}</button>
+                    </span>
+
+                    {/* Total Price */}
+                    <span className="text-center font-semibold text-gray-800">
+                      ₹{product.price * cartItems[itemId]}
+                    </span>
+
+                    {/* Remove Button */}
+                    <span className="text-center">
+                      <button
+                        onClick={() => removeFromCart(itemId)}
+                        className="text-red-500 hover:text-red-700 transition-colors duration-200"
+                        aria-label={`Remove ${product.name} from cart`}
+                      >
+                        <IoTrashOutline size={20} />
+                      </button>
+                    </span>
+                  </div>
+                );
+              }
+              return null; // Don't render if product not found for this cart item ID
+              // --- END OF FIX ---
+          })}
         </div>
-    )
+      )}
+
+      {/* Cart Totals Section (Only show if cart is not empty) */}
+      {!isCartEmpty && <CartTotal />}
+    </div>
+  );
 }
 
-export default Cart
+export default Cart;

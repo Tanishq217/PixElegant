@@ -20,7 +20,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// ---------------------
 // Middleware
+// ---------------------
 app.use(express.json());
 app.use(cookieParser());
 
@@ -30,19 +32,21 @@ app.use(cookieParser());
 const allowedOrigins = [
   "http://localhost:5173",                 // Frontend dev
   "http://localhost:5175",                 // Admin dev
-  "https://pixelegant.netlify.app",       // Netlify frontend
-  "https://pixelegant-admin.netlify.app"  // Netlify admin
+  "https://pixelegant.netlify.app",       // Frontend prod
+  "https://pixelegant-admin.netlify.app", // Old admin prod
+  "https://adminpix.netlify.app"          // New admin prod
 ];
 
 app.use(cors({
   origin: function(origin, callback) {
+    // allow requests with no origin (mobile apps, curl)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error("CORS: Origin not allowed"));
+      callback(new Error(`CORS: Origin ${origin} not allowed`));
     }
   },
-  credentials: true,
+  credentials: true, // allow cookies
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
@@ -50,10 +54,14 @@ app.use(cors({
 // Handle preflight requests for all routes
 app.options("*", cors({
   origin: allowedOrigins,
-  credentials: true
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
+// ---------------------
 // Serve static uploads
+// ---------------------
 app.use('/uploads', express.static(path.join(__dirname, 'public')));
 
 // ---------------------

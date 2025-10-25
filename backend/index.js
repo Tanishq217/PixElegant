@@ -1,3 +1,4 @@
+// backend/index.js
 import express from 'express';
 import dotenv from 'dotenv';
 import connectDb from './config/db.js';
@@ -20,65 +21,55 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// ---------------------
 // Middleware
-// ---------------------
 app.use(express.json());
 app.use(cookieParser());
 
-// ---------------------
 // CORS configuration
-// ---------------------
 const allowedOrigins = new Set([
-  "http://localhost:5173",                 // Frontend dev
-  "http://localhost:5175",                 // Admin dev
-  "https://pixelegant.netlify.app",       // Frontend prod
-  "https://pixelegant-admin.netlify.app", // Old admin prod
-  "https://adminpix.netlify.app"          // New admin prod
+  "http://localhost:5173",       // Frontend dev
+  "http://localhost:5175",       // Admin dev
+  "YOUR_FRONTEND_URL",           // Frontend prod (e.g., https://pixelegant.netlify.app)
+  "YOUR_ADMIN_URL"               // Admin prod (e.g., https://adminpix.netlify.app)
+  // Add any other specific URLs if needed
 ]);
 
 const corsOptions = {
   origin: (origin, callback) => {
-    // allow requests with no origin (e.g. Postman, mobile apps, curl)
+    // Allow requests with no origin OR from allowed origins
     if (!origin || allowedOrigins.has(origin)) {
+      console.log(`CORS: Allowed origin: ${origin || 'N/A'}`); // Log allowed origins
       callback(null, true);
     } else {
+      console.error(`CORS: Blocked origin: ${origin}`); // Log blocked origins
       callback(new Error(`CORS: Origin ${origin} not allowed`));
     }
   },
-  credentials: true, // allow cookies
+  credentials: true, // IMPORTANT for cookies
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization", "Accept", "X-Requested-With"]
 };
 
-// Enable CORS globally (this handles preflight OPTIONS too)
 app.use(cors(corsOptions));
 
-// If you need to handle preflight explicitly for a specific path, use '/*' (not '*').
-// In most setups app.use(cors()) is sufficient, so we remove the problematic app.options('*', ...)
+// Handle preflight requests explicitly for all routes
+app.options('*', cors(corsOptions)); // Handles OPTIONS requests
 
-// ---------------------
 // Serve static uploads
-// ---------------------
-app.use('/uploads', express.static(path.join(__dirname, 'public')));
+app.use('/uploads', express.static(path.join(__dirname, 'public/uploads'))); // Ensure correct path if needed
 
-// ---------------------
 // API Routes
-// ---------------------
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/product", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/order", orderRoutes);
 
-// ---------------------
-// Health check (optional)
-// ---------------------
+// Health check
 app.get('/health', (req, res) => res.json({ ok: true }));
 
-// ---------------------
 // Connect to MongoDB & Start Server
-// ---------------------
+// ... (rest of your connection logic) ...
 const PORT = parseInt(process.env.PORT || '4000', 10);
 const MONGO_URI = process.env.MONGODB_URI || process.env.MONGODB_URL;
 
